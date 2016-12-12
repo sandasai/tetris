@@ -1,0 +1,12 @@
+.board {
+  position: relative;
+}
+
+.overlay {
+  position: absolute;
+}
+
+.cells {
+  position: relative;
+  left: 1px;
+}
