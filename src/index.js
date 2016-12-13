@@ -3,18 +3,16 @@ import ReactDOM from 'react-dom';
 import { combineReducers, createStore } from 'redux';
 import { Router, Route, browserHistory } from 'react-router';
 import { Provider } from 'react-redux';
-import ReduxThunk from 'redux-thunk';
 
 import Tetris from './components/tetris';
 import * as actions from './actions';
-import { game, editor } from './reducers';
+import { game } from './reducers';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 
 const reducers = combineReducers({
-  game,
-  editor
+  game
 });
 let store = createStore(reducers);
 
@@ -32,16 +30,16 @@ export const setTimer = (interval) => {
 //initiates keyboard events
 function eventHandler(e) {
   switch (e.key) {
-    case 'ArrowLeft':
+    case 'j':
       store.dispatch(actions.move(actions.MOVE_LEFT));
       break;
-    case 'ArrowRight':
+    case 'l':
       store.dispatch(actions.move(actions.MOVE_RIGHT));
       break;
-    case 'ArrowDown':
+    case 'k':
       store.dispatch(actions.move(actions.MOVE_DOWN));
       break;
-    case 'ArrowUp':
+    case 'i':
       store.dispatch(actions.rotate(actions.ROTATE));
       break;
     case ' ':

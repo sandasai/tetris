@@ -2,6 +2,7 @@ import React from 'react';
 /*
 props -
   r, c
+  onClick - function to execute when this cell is clicked
 */
 const Cell = (props) => {
   const { r, c, cellSize=16 } = props;
@@ -13,8 +14,13 @@ const Cell = (props) => {
     height: cellSize.toString() + 'px',
     position: 'absolute',
   }
+  const handleClick = () => {
+    if (props.onClick) {
+      props.onClick(r, c);
+    }
+  }
   return (
-    <div style={style} >
+    <div onClick={handleClick} style={style} >
     </div>
   )
 }

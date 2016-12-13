@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import _ from 'lodash';
-
+import { editorToggleCellInRotation } from '../actions';
 import Grid from './grid';
 
 class BlockEditorRotations extends Component {
@@ -10,15 +10,19 @@ class BlockEditorRotations extends Component {
     const blockType = this.props.game.blockCollection[this.props.game.editorSelectBlock]
     const color = blockType.color;
     return blockType.unitRotations.map((rotation) => {
+      const rotationIndex = blockType.unitRotations.indexOf(rotation)
       const height = rotation.grid.length;
       const width = rotation.grid[0].length;
       const filled = _.cloneDeep(rotation.cells).map((cell) => {
         cell.color = color;
         return cell;
       });
+      const handleCellClick = (r, c) => {
+        this.props.editorToggleCellInRotation(rotationIndex, r, c);
+      }
       return (
-        <div key={blockType.unitRotations.indexOf(rotation)} style={{display: 'inline-block'}}>
-          <Grid height={height} width={width} filled={filled} />
+        <div key={rotationIndex} style={{display: 'inline-block'}}>
+          <Grid onCellClick={handleCellClick} height={height} width={width} filled={filled} />
         </div>
       )
     })
@@ -38,4 +42,8 @@ const mapStateToProps = (state) => {
   }
 }
 
-export default connect(mapStateToProps)(BlockEditorRotations);
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators({ editorToggleCellInRotation }, dispatch);
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(BlockEditorRotations);

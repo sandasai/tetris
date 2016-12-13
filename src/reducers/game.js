@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import Settings from '../constants/settings';
-import StandardBlocks, { arrayStandardBlock } from '../constants/standard_blocks'; //should be from reducer
+import { arrayStandardBlock } from '../constants/standard_blocks'; //should be from reducer
 import * as actions from '../actions';
 import { setTimer } from '../index';
 import GameStates from '../constants/gamestates';
+import { rotationResize, rotationToggleCell, addRotationToRotations } from '../constants/data_structures';
 
 const EditorActionValues = _.map((actions.EDITOR), (val) => { return val });
 
@@ -62,7 +63,7 @@ const findTopLeft = (cells) => {
 //Returns a random block with coordinates at the top of the board
 function spawnBlock(collection) {
   const { spawnRow, spawnCol } = Settings;
-  const randomBlock = _.sample(collection);
+  const randomBlock = _.sample(collection); //reference
   const blockStartCells = [];
   let topCellRow = 1000, leftCellCol = 1000;
   let rotation = 0;
@@ -83,16 +84,12 @@ function spawnBlock(collection) {
     cell.c += (spawnCol - leftCellCol);
   }
   return {
-    name: randomBlock.name,
+    name: randomBlock.name, //copied by value b/c javascript. string - primitive type
     cells: blockStartCells,
-    color: randomBlock.color,
+    color: randomBlock.color, //copied by value b/c javascript
     rotation,
-    unitRotations: randomBlock.unitRotations
+    unitRotations: randomBlock.unitRotations //reference because js object
   }
-}
-
-function checkGameOver(state) {
-  //
 }
 
 //Givens a set of cells, translates them with the given vector { r: row, c:: col }
@@ -148,15 +145,15 @@ function nextRotationIndex(rotation, unitRotations) {
 }
 
 //Gets the projection of the current block if it kept falling until collision
+//Currently requires that the block has cells otherwise infinite loop;
 function getProjectionHelper(state, block) {
   if (!checkCollision(state, block.cells)) {
-    translate(block.cells, { r: 1, c:0 });
+    translate(block.cells, { r: 1, c: 0 });
     return getProjectionHelper(state, block);
   }
   translate(block.cells, { r: -1, c:0 });
   return block;
 }
-
 function getProjection(state) {
   let blockProjection = _.cloneDeep(state.block);
   state.blockProjection = getProjectionHelper(state, blockProjection);
@@ -167,14 +164,24 @@ function handleTick(state) {
   let newState = _.clone(state);
   let { board, block, rowsToLvl } = newState;
   let projBlockCells = translate(_.cloneDeep(block.cells), { r: 1, c: 0 });
-  if (!checkCollision(state, projBlockCells)) {
+  if (!checkCollision(state, projBlockCells)) { //check collision
     block.cells = projBlockCells;
   }
-  else {
+  else { //add the block to the grid;
     for (let cell of block.cells) {
       board[cell.r][cell.c] = block.color;
     }
-    newState.block = spawnBlock(newState.blockCollection); //if there is a collision on instatiating, gameover
+    let newBlock = spawnBlock(newState.blockCollection); //if there is a collision on instatiating, gameover
+    if (checkCollision(newState, newBlock.cells)) {
+      newBlock.cells = newBlock.cells.filter((cell) => {
+        if (cell.r < 0)
+          return false;
+        return true;
+      })
+      newState.gameState = GameStates.gameover;
+      return newState;
+    }
+    newState.block = newBlock;
   }
   //Remove any rows that are filled
   _.times(board.length, (r) => {
@@ -193,10 +200,6 @@ function handleTick(state) {
       newState.totalRowsCleared++;
     }
   });
-  //check if new block will collide
-  if (checkCollision(newState, newState.block.cells)) {
-    console.log('GAMEOVER');
-  };
   //level up
   if (newState.rowsCleared >= rowsToLvl) {
     newState.rowsCleared = 0;
@@ -245,22 +248,40 @@ function handlePause(state) {
   return newState;
 }
 
-function handleEditorSelectBlock(state, blockType) {
-  return {...state, editorSelectBlock: state.blockCollection.indexOf(blockType)}
-}
-
+//Should just be refactored possible into another file
 function handleEditorForm(state, action) {
   let newState = _.clone(state);
   const { editorSelectBlock, blockCollection } = newState;
   switch (action.type) {
     case actions.EDITOR.SELECT_BLOCK_FROM_COLLECTION:
-      newState.editorSelectBlock = newState.blockCollection.indexOf(action.payload);
+      newState.editorSelectBlock = blockCollection.indexOf(action.payload);
       break;
     case actions.EDITOR.CHANGE_NAME:
-      newState.blockCollection[editorSelectBlock].name = action.payload;
+      blockCollection[editorSelectBlock].name = action.payload;
       break;
     case actions.EDITOR.CHANGE_COLOR:
-      newState.blockCollection[editorSelectBlock].color = action.payload;
+      blockCollection[editorSelectBlock].color = action.payload;
+      break;
+    case actions.EDITOR.TOGGLE_CELL_IN_ROTATION:
+      let { selectedRotationIndex, r, c} = action.payload;
+      let selectedRotation = blockCollection[editorSelectBlock].unitRotations[selectedRotationIndex];
+      rotationToggleCell(selectedRotation, r, c);
+      break;
+    case actions.EDITOR.CHANGE_DIM_WIDTH:
+      for (let rotation of blockCollection[editorSelectBlock].unitRotations) {
+        rotationResize(rotation, 'width', action.payload);
+      }
+      break;
+    case actions.EDITOR.CHANGE_DIM_HEIGHT:
+      for (let rotation of blockCollection[editorSelectBlock].unitRotations) {
+        rotationResize(rotation, 'height', action.payload);
+      }
+      break;
+    case actions.EDITOR.CREATE_ROTATION:
+      addRotationToRotations(blockCollection[editorSelectBlock].unitRotations);
+      break;
+    case actions.EDITOR.CREATE_BLOCK:
+      blockCollection.push(action.payload);
       break;
     default: break;
   }
@@ -268,7 +289,7 @@ function handleEditorForm(state, action) {
 }
 
 export default function game(state = initGame(), action)  {
-  if (EditorActionValues.indexOf(action.type) != -1)
+  if (EditorActionValues.indexOf(action.type) !== -1)
     return handleEditorForm(state, action);
 
   if (state.gameState === GameStates.pause && action.type === actions.PAUSE) {
@@ -278,7 +299,6 @@ export default function game(state = initGame(), action)  {
     case GameStates.play:
       switch (action.type) {
         case actions.TICK:
-          console.log(state);
           return handleTick(state);
         case actions.MOVE_LEFT:
           return handleMove(state, { r: 0 , c: -1 });
@@ -292,6 +312,8 @@ export default function game(state = initGame(), action)  {
           return handleDrop(state);
         case actions.PAUSE:
           return handlePause(state);
+        case actions.RESTART:
+          return initGame();
         default:
           break;
       }

@@ -1,58 +1,43 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import Cell from './cell';
+import Grid from './grid';
 import _ from 'lodash';
-import './board.css';
 import Settings from '../constants/settings';
-import GameStates from '../constants/gamestates';
+
+const stylesBoard = {
+  position: 'relative',
+  display: 'inline-block',
+}
 
 class Board extends Component {
-  renderCells() {
+  render() {
     const grid = this.props.game.board;
     const { cells, color } = this.props.game.block;
-    const { blockProjection } = this.props.game
-    return _.flatten(_.times(grid.length, (r) => {
-      return _.times(grid[r].length, (c) => {
-        let cellColor = grid[r][c];
-        for (let cell of blockProjection.cells) {
-          if (cell.r === r && cell.c === c)
-            cellColor = Settings.blockProjectionColor;
+    const cellsProj = this.props.game.blockProjection.cells;
+    let filledCells = [];
+    _.times(grid.length, (r) => { //fill in current grid
+      _.times(grid[r].length, (c) => {
+        if (grid[r][c] !== null) {
+          filledCells.push({ r, c, color: grid[r][c]});
         }
-        for (let cell of cells) {
-          if (cell.r === r && cell.c === c)
-            cellColor = color;
-        }
-        return (
-          <Cell r={r} c={c} backgroundColor={cellColor} key={r + ' ' + c}/>
-        )
-      })
-    }));
-  }
-  overlayStyles = () => {
-    const { cellSize, height, width } = Settings;
-    return {
-      height: (cellSize * height).toString() + 'px',
-      width: (cellSize * width).toString() + 'px',
-      borderStyle: 'solid',
-      borderWidth: '0.1px',
-      backgroundColor: 'black',
-      opacity: '1.0'
+      });
+    });
+    let uniqueProj = cellsProj.filter((projCell) => {
+      for (let cell of cells) {
+        if (cell.r === projCell.r && cell.c === projCell.c)
+          return false;
+      }
+      return true;
+    })
+    for (let cell of cells) {
+      filledCells.push({ r: cell.r, c: cell.c, color});
     }
-  }
-  renderBoardOverlay() {
-    const { gameState } = this.props.game;
-    switch (gameState) {
-      case GameStates.gameover:
-        break;
-      default:
-        break;
+    for (let cell of uniqueProj) {
+      filledCells.push({ r: cell.r, c: cell.c, color: Settings.blockProjectionColor});
     }
-  }
-  render() {
     return (
-      <div className="board">
-        <div className="overlay" style={this.overlayStyles()}>{this.renderBoardOverlay()}</div>
-        <div className="cells">{this.renderCells()}</div>
+      <div style={stylesBoard}>
+        <Grid width={grid[0].length} height={grid.length} filled={filledCells}/>
       </div>
     )
   }

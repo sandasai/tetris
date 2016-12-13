@@ -5,7 +5,7 @@ import _ from 'lodash';
 const styleGrid = {
   display: 'block',
   position: 'relative',
-  margin: '5px'
+  margin: '5px',
 }
 
 /* acceptable props
@@ -16,9 +16,10 @@ const styleGrid = {
   defaultColor - the color of cells that are not filled
   cellBorderStyle - border style of the cells
   cellBorderWidth - border width of the cells
+  onCellClick(r, c) - function(r, c) to execute when a cell is clicked.
 */
 const Grid = (props) => {
-  const { width, height, cellSize=16, filled=[], color='' } = props;
+  const { width, height, cellSize=16, filled=[] } = props;
   const gridWidth = width * cellSize + 5;
   const gridHeight = height * cellSize + 5;
   const renderCells = () => {
@@ -39,14 +40,18 @@ const Grid = (props) => {
         if (c === width - 1) {
           cellStyles.borderRightStyle = 'dotted';
         }
-        let color = '';
         for (let cell of filled) {
           if (cell.r === r && cell.c ===c) {
             cellStyles.backgroundColor = cell.color;
           }
         }
+        const handleCellClick = (r, c) => {
+          if (props.onCellClick) {
+            props.onCellClick(r, c);
+          }
+        }
         return (
-          <Cell {...cellStyles} key={r + ' ' + c}/>
+          <Cell onClick={handleCellClick} {...cellStyles} key={r + ' ' + c}/>
         )
       })
     })
