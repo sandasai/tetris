@@ -55,7 +55,9 @@ export const EDITOR = {
   CHANGE_DIM_HEIGHT: 'EDITOR_CHANGE_DIM_HEIGHT',
   CHANGE_DIM_WIDTH: 'EDITOR_CHANGE_DIM_WIDTH',
   CHANGE_COLOR: 'EDITOR_CHANGE_COLOR',
-  TOGGLE_CELL_IN_ROTATION: 'EDITOR_TOGGLE_CELL_IN_ROTATION'
+  TOGGLE_CELL_IN_ROTATION: 'EDITOR_TOGGLE_CELL_IN_ROTATION',
+  REMOVE_BLOCK: 'EDITOR_REMOVE_BLOCK',
+  REMOVE_ROTATION: 'EDITOR_REMOVE_ROTATION'
 }
 
 export function selectBlockFromCollection(blockType) {
@@ -115,5 +117,19 @@ export function editorToggleCellInRotation(selectedRotationIndex, r, c) {
       r,
       c
     }
+  }
+}
+
+export function editorRemoveBlock(blockCollectionIndex) {
+  return {
+    type: EDITOR.REMOVE_BLOCK,
+    payload: blockCollectionIndex
+  }
+}
+
+export function editorRemoveRotation(rotationIndex) {
+  return {
+    type: EDITOR.REMOVE_ROTATION,
+    payload: rotationIndex
   }
 }

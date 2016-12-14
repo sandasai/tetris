@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import _ from 'lodash';
-import { selectBlockFromCollection, editorCreateBlock } from '../actions';
+import { selectBlockFromCollection, editorCreateBlock, editorRemoveBlock } from '../actions';
 
 import Grid from './grid';
 import Xclose from './xclose';
@@ -27,11 +27,16 @@ class BlockCollection extends Component {
         cell.color = color;
         return cell;
       });
+      const index = blockCollection.indexOf(blockType);
       const handleGridClick = (e) => {
         this.props.selectBlockFromCollection(blockType);
       }
+      const handleClose = (e) => {
+        this.props.editorRemoveBlock(index);
+      }
       return (
-        <div style={stylesBlockCollection} key={blockCollection.indexOf(blockType)}>
+        <div style={stylesBlockCollection} key={index}>
+          <Xclose onClick={handleClose} />
           <Grid onClick={handleGridClick} width={width} height={height} filled={filled}/>
         </div>
       )
@@ -62,7 +67,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ selectBlockFromCollection, editorCreateBlock }, dispatch);
+  return bindActionCreators({ selectBlockFromCollection, editorCreateBlock, editorRemoveBlock }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlockCollection);

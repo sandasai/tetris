@@ -283,6 +283,12 @@ function handleEditorForm(state, action) {
     case actions.EDITOR.CREATE_BLOCK:
       blockCollection.push(action.payload);
       break;
+    case actions.EDITOR.REMOVE_BLOCK:
+      blockCollection.splice(action.payload, 1);
+      break;
+    case actions.EDITOR.REMOVE_ROTATION:
+      blockCollection[editorSelectBlock].unitRotations.splice(action.payload, 1);
+      break;
     default: break;
   }
   return newState;

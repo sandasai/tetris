@@ -13,7 +13,7 @@ const Xclose = (props) => {
   }
   return (
     <div onClick={handleClick} style={styles}>
-      <span>X</span>
+      <a>X</a>
     </div>
   )
 }

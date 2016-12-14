@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import _ from 'lodash';
-import { editorToggleCellInRotation } from '../actions';
+import { editorToggleCellInRotation, editorRemoveRotation } from '../actions';
 import Grid from './grid';
+import Xclose from './xclose';
 
 class BlockEditorRotations extends Component {
   renderRotations() {
@@ -20,8 +21,12 @@ class BlockEditorRotations extends Component {
       const handleCellClick = (r, c) => {
         this.props.editorToggleCellInRotation(rotationIndex, r, c);
       }
+      const handleClose = () => {
+        this.props.editorRemoveRotation(rotationIndex);
+      }
       return (
         <div key={rotationIndex} style={{display: 'inline-block'}}>
+          <Xclose onClick={handleClose} />
           <Grid onCellClick={handleCellClick} height={height} width={width} filled={filled} />
         </div>
       )
@@ -43,7 +48,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ editorToggleCellInRotation }, dispatch);
+  return bindActionCreators({ editorToggleCellInRotation, editorRemoveRotation }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlockEditorRotations);
