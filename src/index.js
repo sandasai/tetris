@@ -25,6 +25,7 @@ export const setTimer = (interval) => {
 
 //initiates keyboard events
 function eventHandler(e) {
+  e.preventDefault();
   switch (e.keyCode) {
     case 74:
       store.dispatch(actions.move(actions.MOVE_LEFT));
@@ -48,6 +49,7 @@ function eventHandler(e) {
       break;
   }
 }
+document.addEventListener("keydown", eventHandler, false);
 
 ReactDOM.render(
     <Provider store={store}>
