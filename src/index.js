@@ -1,15 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { combineReducers, createStore } from 'redux';
-import { Router, Route, browserHistory } from 'react-router';
 import { Provider } from 'react-redux';
 
 import Tetris from './components/tetris';
 import * as actions from './actions';
 import { game } from './reducers';
-
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-
 
 const reducers = combineReducers({
   game
@@ -55,14 +51,9 @@ function eventHandler(e) {
 window.addEventListener("keydown", eventHandler, false);
 
 ReactDOM.render(
-  <MuiThemeProvider>
     <Provider store={store}>
-      <Router history={browserHistory}>
-        <Route path="/" component={Tetris}>
-        </Route>
-      </Router>
+      <Tetris />
     </Provider>
-  </MuiThemeProvider>
   ,
   document.getElementById('root')
 );
