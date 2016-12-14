@@ -17,6 +17,8 @@ class Tetris extends Component {
       <div className="container">
         <div className="row">
           <div className="four columns">
+            <h5>Tetris</h5>
+            <p>I, J, K, L to move.<br />Spacebar to drop, P to pause</p>
             <ScoreBoard />
             <Board />
             <button onClick={() => {this.handleRestart()}} className="button">Restart</button>

@@ -25,30 +25,29 @@ export const setTimer = (interval) => {
 
 //initiates keyboard events
 function eventHandler(e) {
-  switch (e.key) {
-    case 'j':
+  switch (e.keyCode) {
+    case 74:
       store.dispatch(actions.move(actions.MOVE_LEFT));
       break;
-    case 'l':
+    case 76:
       store.dispatch(actions.move(actions.MOVE_RIGHT));
       break;
-    case 'k':
+    case 75:
       store.dispatch(actions.move(actions.MOVE_DOWN));
       break;
-    case 'i':
+    case 73:
       store.dispatch(actions.rotate(actions.ROTATE));
       break;
-    case ' ':
+    case 32:
       store.dispatch(actions.drop());
       break;
-    case 'p':
+    case 80:
       store.dispatch(actions.pause());
       break;
     default:
       break;
   }
 }
-window.addEventListener("keydown", eventHandler, false);
 
 ReactDOM.render(
     <Provider store={store}>
